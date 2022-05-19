@@ -108,12 +108,15 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
       Download file : [CallableFileRead.zip](https://github.com/fdut/file-download-callableflow/raw/main/toolkit/src/CallableFileRead.zip)
     - Open the toolkit.
     - Import the project into the toolkit. For example, **click File > Import, select IBM Integration > Project Interchange, select the downloaded file, then click Finish**.
-6. Update File directory.
+6. Update File directory parameter .
     - In toolkit. Extend Application **UC1_CallableFileRead** and open flow **ReturnFileAsMultiPart.msgflow**
     - Click on node **File Read** 
     - Update path of the **input directory** where are located PDF files.
+            ![](images/updatefiledirectory.jpg)
+    - **Copy the sample PDF file in the input directory**
 
-        ![](images/updatefiledirectory.jpg)
+        - [Download Sample PDF files](https://github.com/fdut/file-download-callableflow/tree/main/samples)
+
 8. Deploy the Application to the integration server in the toolkit you intend to use for the tutorial (TEST_SERVER); for example, drag the Application named **UC1_CallableFileRead** and then drop it onto the integration server *TEST_SERVER*.  
 
     ![](images/deploy.gif)
@@ -155,8 +158,26 @@ Otherwise, just return to the Dashboard, You can start the flow from there, as o
          }
          ```
 
+## Use a Front office
 
-    
+A sample of ReactJS application is provided to demonstrate the API capability.
+
+- Update the following part in App.js with your entries.
+
+```
+ // API with encoded result
+  const encodedAPIEnpoint =
+    'https://service.eu.apiconnect.ibmcloud.com/gws/apigateway/api/b9009f16c1d17b560581327195d31a0ce101ab80b6557979a143d0811fcbb338/SsHJwI'
+  const clientId = '<YOUR API KEY>'
+  // ------------------------------------------------------------
+  ```
+
+  - in the **uc1-invoice-front** run **npm install** and **npm start**
+
+  - Enter a order number (Order number will present in PDF file name)
+  - Click on button **Get Invoice file (Encoded)** 
+
+ ![Front](images/front.gif)
 
 
 
