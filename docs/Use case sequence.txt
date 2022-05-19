@@ -1,0 +1,11 @@
+title Use case sequence
+
+Consumer->ACEonCloud: Get invoice PDF file for this order number
+note right of Consumer: Basic Authentication
+ACEonCloud->ACEonPremise: Ask for file for this order number
+note right of ACEonCloud: Using CallableFlow
+ACEonPremise-> FileStorage: Search file on local storage
+FileStorage-> ACEonPremise: Return PDF file
+ACEonPremise->ACEonCloud: Return encoded PDF file
+note right of ACEonCloud: Using CallableFlow
+ACEonCloud->Consumer:Return JSON content with encoded PDF file

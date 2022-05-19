@@ -1,0 +1,159 @@
+$integration: http://ibm.com/appconnect/integration/v2/integrationFile
+integration:
+  type: api
+  trigger-interfaces:
+    trigger-interface-1:
+      triggers:
+        getencodedInput:
+          assembly:
+            $ref: '#/integration/assemblies/assembly-2'
+          input-context:
+            data: input
+          output-context:
+            data: ouput
+      options:
+        resources:
+          - business-object: input
+            model:
+              $ref: '#/models/input'
+            triggers:
+              getencoded: getencodedInput
+          - business-object: ouput
+            model:
+              $ref: '#/models/ouput'
+            triggers: {}
+      type: api-trigger
+  action-interfaces:
+    action-interface-2:
+      type: api-action
+      business-object: request
+      connector-type: iiboc
+      account-name: Account 1
+      actions:
+        INVOKEACTION: {}
+  assemblies:
+    assembly-2:
+      assembly:
+        execute:
+          - custom-action:
+              name: Callable flow Invoke
+              target:
+                $ref: '#/integration/action-interfaces/action-interface-2'
+              action: INVOKEACTION
+              map:
+                customSchemas:
+                  properties.`localEnvironment`:
+                    type: object
+                    properties:
+                      ordernumber:
+                        type: string
+                mappings:
+                  - application:
+                      template: UC1_CallableFileRead
+                  - endpoint:
+                      template: ReturnFileAsMultiPart
+                  - localEnvironment:
+                      mappings:
+                        - ordernumber:
+                            template: '{{$api.ordernumber}}'
+                $map: http://ibm.com/appconnect/map/v1
+                input:
+                  - variable: api
+                    $ref: '#/trigger/api/parameters'
+                  - variable: flowDetails
+                    $ref: '#/flowDetails'
+          - parse:
+              name: JSON Parser Parse
+              parse-format: json
+              source:
+                template: '{{$CallableflowInvoke.localEnvironment}}'
+                input:
+                  - variable: api
+                    $ref: '#/trigger/api/parameters'
+                  - variable: CallableflowInvoke
+                    $ref: '#/node-output/Callable flow Invoke/response/payload'
+                  - variable: flowDetails
+                    $ref: '#/flowDetails'
+              sample-data: >-
+                {
+                  "Filename":"IN_00100_22007894_SK_22006710_RI_6369205_93135.pdf",
+                "File":"LS1teUJvdW5kYXJ5DQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL3BkZg0KQ29udGVudC1EaXNwb3NpdGlvbjogYXR0YWNobWVudDsgZmlsZW5hbWU9ImZpbGVuYW1lLnBkZiIN/PtlXFL1sRngJWjubo1T6+uhNWra/N3s/rzE4Bas7p"
+
+                }
+              output-schema:
+                $schema: http://json-schema.org/draft-04/schema#
+                type: object
+                properties:
+                  Filename:
+                    type: string
+                  File:
+                    type: string
+                title: Parsed JSON
+          - response:
+              name: response-1
+              reply-maps:
+                - title: input successfully add custom operation
+                  status-code: 200
+                  map:
+                    mappings:
+                      - file:
+                          template: '{{$JSONParserParse.File}}'
+                      - filename:
+                          template: '{{$JSONParserParse.Filename}}'
+                    $map: http://ibm.com/appconnect/map/v1
+                    input:
+                      - variable: api
+                        $ref: '#/trigger/api/parameters'
+                      - variable: CallableflowInvoke
+                        $ref: '#/node-output/Callable flow Invoke/response/payload'
+                      - variable: JSONParserParse
+                        $ref: '#/node-output/JSON Parser Parse/response/payload'
+                      - variable: flowDetails
+                        $ref: '#/flowDetails'
+                  input: []
+  name: UC1_DownloadInvoiceFile
+models:
+  input:
+    name: input
+    properties:
+      ordernumber:
+        required: false
+        id: true
+        type: string
+    plural: input
+    description: ' Post order number'
+    operations:
+      getencoded: '#/integration/assemblies/assembly-2'
+    methods:
+      getencoded:
+        name: getencoded
+        display:
+          name: Get Invoice file
+        accessType: WRITE
+        accepts:
+          - arg: ordernumber
+            type: string
+            http:
+              source: path
+            required: true
+        returns:
+          arg: data
+          type: ouput
+          root: true
+        http:
+          verb: GET
+          path: /:ordernumber/getencoded
+  ouput:
+    name: ouput
+    properties:
+      filename:
+        required: false
+        id: true
+        type: string
+      file:
+        required: false
+        id: false
+        type: string
+    plural: ouput
+    description: ' '
+    operations: {}
