@@ -1,8 +1,14 @@
 # Expose File on Hybrid architecture with App Connect Enterprise. 
 
-In this blog i want to share with you an use case we implemented for a customer.
+In this blog, i want to share with you an use case we implemented for a customer.
 
-The goal was to provide an API exposed by ACE on Cloud to download a file (In this case a invoice PDF file) provided by ACE on Premise
+
+
+The goal was to provide an API exposed by ACE on Cloud to download a file (In this case a PDF file) provided by ACE on Premise.
+
+This API will be used by a consumer app (Magento for exemple) to retrieve the invoice document.
+
+So we give a order number in the request and the corresponding invoice PDF file is returned.
 
 ![arch-logique](images/file-api-arch-logique.png)
 
@@ -13,15 +19,19 @@ The sequence is the following :
 
 The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise using Callable-flow. 
 
-### No-Functional Requirement
+## No-Functional Requirement
 - The API will be made available with App Connect on IBM Cloud (Saas offering)
 - Files are available on-premise and will be served through an existing App Connect Enterprise instance (Native install on Windows Server)
 - Communication between the 2 instances (Cloud and on-premise) will be done with Callable flows
 
-> The advantage of Callableflow is to a have secure connection between SaaS and On-Premise with mTLS communcation.
+> The advantage of Callableflow is to have a secure connection between SaaS and On-Premise with mTLS communcation.
+
+## Logical Architecture
+
+![arch-logique-current-ibm-pattern](images/arch-logique-current-ibm-pattern.png)
 
 
-### Flows specifications
+## Flows specifications
 
 ![](images/download-file-api.png)
 
@@ -33,7 +43,7 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 	![](./images/UC1_DownloadInvoiceFile.jpg)
 	
 	
-- Flow 2: [UC1_CallableFileRead](./toolkit/v11/src/UC1_CallableFileRead)
+- Flow 2: [UC1_CallableFileRead](./toolkit/src/CallableFileRead.zip)
 
 	- It is the flow to deploy on the  *ACE on premise*
     - This flow search and return file for the specified order number.
@@ -43,9 +53,8 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 
 
 
-## Test on your environment
+## Prepare your environment
 
-To test this use case you need :
 
 1. **Donwload ACE Toolkit** and Install Toolkit
     - [Download IBM App Connect Enterprise for Developers and get started with a hands-on experience](https://www.ibm.com/docs/en/app-connect/12.0?topic=enterprise-download-ace-developer-edition-get-started)
@@ -58,23 +67,23 @@ To test this use case you need :
     - Sign in to IBM App Connect on IBM Cloud.
     - On the Dashboard, click the Callable flows icon Callable flows icon
     - Click Connect callable flows.
+
     *Figure 2. App Connect Dashboard, showing the Callable flows features*
-    
-    
     ![App Connect Dashboard](images/pf-ace-image02-1.png)
 
     - This opens the Synchronize your on-premises agent dialog.
+
     *Figure 3. The Synchronize your on-premises agent dialog*
     ![](images/pf-ace-image03.png)
 
-    - Click Download the configuration; this opens a dialog to save the agentx.json file.
+    - Click **Download the configuration**; this opens a dialog to **save the agentx.json** file.
 
-    - Leave the Synchronize your on-premises agent dialog open (note the dialog contains instructions for installing the agent into the work directory of the integration server in App Connect Enterprise).
-    - After saving the agentx.json file, copy the file to the work directory of the integration server in App Connect Enterprise Tookit: workdirectory/TEST_SERVER/config/iibswitch/agentx
+    - Leave the Synchronize your on-premises agent dialog open (note the dialog contains instructions for installing the agent into the work directory of the integration server in App Connect Enterprise)
+    - After saving the agentx.json file, **copy the file to the work directory of the integration server in App Connect Enterprise Tookit**: (For example) `workdirectory/TEST_SERVER/config/iibswitch/agentx`
 
-    - In your "on-premises" ACE toolkit, if the integration server is not running, start it; for example, in the toolkit right-click the server and then click Start
+    - **In your "on-premises" ACE toolkit, if the integration server is not running, start it**; for example, in the toolkit right-click the server and then click Start
 
-    - Check the console log (To view in the toolkit, you might need to Refresh the server entry under Independent Resources.) You should see messages that indicate ...The integration server component 'agentx' has been started; for example:
+    - **Check the console log** (To view in the toolkit, you might need to Refresh the server entry under Independent Resources.) You should see messages that indicate ...The integration server component 'agentx' has been started; for example:
     ```
     component starting: "agentx"
     Starting agentx with config folder: 'C:\Users\IANLarner\IBM\ACET11\workspace\myServer\config\iibswitch\agentx'
@@ -82,7 +91,7 @@ To test this use case you need :
     2020-06-29 13:31:51.088324: The integration server component 'agentx' has been started. 
     component started: "agentx"
     ```
-    - Switch back to the App Connect Designer window and then test the agent connection:
+    - **Switch back to the App Connect Designer** window and then test the agent connection:
         - Click **Test your agent**
 
             You should see at least 1 agent found. Secure communications for callable flows has been established between IBM App Connect on IBM Cloud and the integration server in your local IBM App Connect Enterprise toolkit.
@@ -90,14 +99,15 @@ To test this use case you need :
         - You can now close the Synchronize your on-premises agent dialog.
 
     
-    
     You have established secure connectivity between flows running in App Connect on IBM Cloud and in the integration server in your on-premises App Connect Enterprise.
 
-5. **Import the enterprise integration project into the toolkit** in the Toolkit
-    1. Download the project interchange file by clicking the link above and saving the file to your local machine.
+## Import and deploy flow components
+
+1. **Import the enterprise integration project into the toolkit** in the Toolkit
+    - Download the project interchange file by clicking the link above and saving the file to your local machine.
       Download file : [CallableFileRead.zip](https://github.com/fdut/file-download-callableflow/raw/main/toolkit/src/CallableFileRead.zip)
-    2. Open the toolkit.
-    3. Import the project into the toolkit. For example, **click File > Import, select IBM Integration > Project Interchange, select the downloaded file, then click Finish**.
+    - Open the toolkit.
+    - Import the project into the toolkit. For example, **click File > Import, select IBM Integration > Project Interchange, select the downloaded file, then click Finish**.
 6. Update File directory.
     - In toolkit. Extend Application **UC1_CallableFileRead** and open flow **ReturnFileAsMultiPart.msgflow**
     - Click on node **File Read** 
@@ -116,24 +126,27 @@ To test this use case you need :
 
 Otherwise, just return to the Dashboard, You can start the flow from there, as outlined in the Test the flow step.
 
-9. Test Flow
-    - In the API Flow click on **Manage**
+## Test the flow
+
+- Go to your App Connect on Cloud
+- In the API Flow click on **Manage**
     ![manage](images/manage.jpg)
-    - Go bottom and in the *Sharing outside of Cloud Foundry organization* click on button *Create API key and documentation link*
+- Go bottom and in the *Sharing outside of Cloud Foundry organization* click on button *Create API key and documentation link*
     ![manage](images/shareoutside.jpg)
-    - Click on button *Create API key and documentation createapikey.jpg
+- Click on button *Create API key and documentation createapikey.jpg
     ![manage](images/createapikey.jpg)
-    - Copy the API document link
+
+- Copy the API document link
     ![doclink](images/doclink.jpg)
-    - Open it in your browser on test your API with your API Key.
-    - Click 
-    - Click **try it**
-    - Enter API Key
-    - Enter a order number. For example 2999 because my PDF file is IN_00**2999**_22007894_93135.pdf
+- Open it in your browser on test your API with your API Key.
+- Click on Get operation.
+- Click **try it**
+- Enter API Key
+- Enter a order number. For example 2999 because my PDF file is IN_00**2999**_22007894_93135.pdf
 
     ![tryit](images/tryit.jpg)
 
-    - If all is OK. API Get return 200 with encoded file in body
+- If all is OK. API Get return 200 with encoded file in body
 
         ``` 
         { 
