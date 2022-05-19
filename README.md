@@ -1,11 +1,11 @@
-# file-download-callableflow
-Expose File on Hybrid architecture with App Connect Enterprise. 
-
-
+# Expose File on Hybrid architecture with App Connect Enterprise. 
 
 In this blog i want to share with you an use case we implemented for a customer.
 
-The goal was to provide an API to download File (In this case a invoice PDF file) using ACE on Cloud to expose API and ACE on Premise to find and return file.
+The goal was to provide an API exposed by ACE on Cloud to download a file (In this case a invoice PDF file) provided by ACE on Premise
+
+![arch-logique](images/file-api-arch-logique.png)
+
 
 The sequence is the following :
 
@@ -40,13 +40,6 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 	
 	![](./images/UC1_CallableFileRead.jpg)
 
-
-### Déploiement des flux
-
-- Aprés validation, démarrer le flux Ace on Cloud
-- Déployer les fichiers BARs sur le serveur ACE on-Premise (UC1_CallableFileRead) et sur ACE on Cloud (UC1_APIRequestFileCallable)
-
-![](./images/download-file-api-arch-logique.png)
 
 
 
@@ -115,9 +108,43 @@ To test this use case you need :
 
     ![](images/deploy.gif)
 7. In App Connect on IBM Cloud, configure and start the callable flow
-    - Download flow 
+    - Download flow [UC1_DownloadInvoiceFile.yaml](https://raw.githubusercontent.com/fdut/file-download-callableflow/main/designer/UC1_DownloadInvoiceFile.yaml)
     - To import the flow, from the dashboard select New > Import flow..., copy or select the flow definition file, then click Finish. This imports the flow and opens it in the Flow editor.
 
-8. Validate CallableFlow communication
+8. After importing the flow, click the action nodes to check the configuration (Callableflow)
+9. To exit and start the flow, open the options menu **[⋮]** in the banner and **click Start API**; then click **Dashboard**.
+
+Otherwise, just return to the Dashboard, You can start the flow from there, as outlined in the Test the flow step.
+
 9. Test Flow
+    - In the API Flow click on **Manage**
+    ![manage](images/manage.jpg)
+    - Go bottom and in the *Sharing outside of Cloud Foundry organization* click on button *Create API key and documentation link*
+    ![manage](images/shareoutside.jpg)
+    - Click on button *Create API key and documentation createapikey.jpg
+    ![manage](images/createapikey.jpg)
+    - Copy the API document link
+    ![doclink](images/doclink.jpg)
+    - Open it in your browser on test your API with your API Key.
+    - Click 
+    - Click **try it**
+    - Enter API Key
+    - Enter a order number. For example 2999 because my PDF file is IN_00**2999**_22007894_93135.pdf
+
+    ![tryit](images/tryit.jpg)
+
+    - If all is OK. API Get return 200 with encoded file in body
+
+        ``` 
+        { 
+          "file": "....encoded file ....",
+          "filename": "IN_00999_22007894_93135.pdf"
+         }
+         ```
+
+
+    
+
+
+
 
