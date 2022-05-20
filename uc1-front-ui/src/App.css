@@ -1,0 +1,49 @@
+section {
+  margin: 1rem auto;
+  width: 100%;
+  max-width: 40rem;
+  text-align: center;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 6px;
+}
+
+section label,
+section input,
+section button,
+section textarea {
+  display: inline-block;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  margin-right: 0.5rem;
+  display: block;
+}
+
+input {
+  font: inherit;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 15rem;
+  max-width: 100%;
+  margin: 10px;
+}
+
+button {
+  font: inherit;
+  border: 1px solid #4f005f;
+  background: #4f005f;
+  color: white;
+  padding: 0.5rem 2rem;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 10px;
+}
+
+textarea {
+  width: 554px;
+  height: 398px;
+}
