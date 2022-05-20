@@ -1,14 +1,11 @@
-# Expose File on Hybrid architecture with App Connect Enterprise. 
-
-In this blog, i want to share with you an use case we implemented for a customer.
+# Expose on-premises files with App Connect on Cloud on Hybrid architecture 
 
 
+The goal is to provide an API exposed by ACE on Cloud to download a file (In this case a PDF file) provided by ACE on Premise.
 
-The goal was to provide an API exposed by ACE on Cloud to download a file (In this case a PDF file) provided by ACE on Premise.
+This API will be used by a consumer app (Magento for example) to retrieve the invoice document.
 
-This API will be used by a consumer app (Magento for exemple) to retrieve the invoice document.
-
-So we give a order number in the request and the corresponding invoice PDF file is returned.
+So, we give an order number in the request and the corresponding invoice PDF file is returned.
 
 ![arch-logique](images/file-api-arch-logique.png)
 
@@ -21,10 +18,11 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 
 ## No-Functional Requirement
 - The API will be made available with App Connect on IBM Cloud (Saas offering)
-- Files are available on-premise and will be served through an existing App Connect Enterprise instance (Native install on Windows Server)
-- Communication between the 2 instances (Cloud and on-premise) will be done with Callable flows
+- Files are available on-premises and will be served through an existing App Connect Enterprise instance (Native install on Windows Server)
+- Communication between the 2 instances (Cloud and on-premises) will be done with Callable flows
 
-> The advantage of Callableflow is to have a secure connection between SaaS and On-Premise with mTLS communcation.
+
+> The advantage of Callable flow is to have a secure connection between SaaS and On-Premises with mTLS communication.
 
 ## Logical Architecture
 
@@ -38,7 +36,8 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 - Flow 1: [UC1_DownloadInvoiceFile.yaml](./designer/UC1_DownloadInvoiceFile.yaml)
 
 	- It is the "Flow for API" to deploy in *ACE on Cloud*.
-    - This flow expose an API and use CallableFlow to request On-Premise AppConnect Enterprise
+    - This flow exposes an API and use Callable Flow to request on-premises AppConnect Enterprise.
+    - The Callable flow invoke return is parsed to update *Response* body
 	
 	![](./images/UC1_DownloadInvoiceFile.jpg)
 	
@@ -47,6 +46,8 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
 
 	- It is the flow to deploy on the  *ACE on premise*
     - This flow search and return file for the specified order number.
+    - *odernumber* is available in LocalEnvironment.Variables and used to generated file name pattern (IN_*<ordername>*.pdf). This pattern will be used to seach file in the local directory.
+    - The file is then returned **encoded** or as **Blob** format (depending on  the type of request. See alternative solution in this tutorial)
 	
 	![](./images/UC1_CallableFileRead.jpg)
 
@@ -64,14 +65,14 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
     - Go to App Connect offering https://cloud.ibm.com/catalog/services/app-connect and choose **Lite** plan and click **Create**
 4. **Configure Callable flow connection**
 
-    - Sign in to IBM App Connect on IBM Cloud.
-    - On the Dashboard, click the Callable flows icon Callable flows icon
-    - Click Connect callable flows.
+    - Sign in to **IBM App Connect on IBM Cloud**.
+    - On the Dashboard, click the **Callable flows** icon 
+    - Click **Connect callable flows**.
 
     *Figure 2. App Connect Dashboard, showing the Callable flows features*
     ![App Connect Dashboard](images/pf-ace-image02-1.png)
 
-    - This opens the Synchronize your on-premises agent dialog.
+    - This opens the **Synchronize your on-premises agent dialog**.
 
     *Figure 3. The Synchronize your on-premises agent dialog*
     ![](images/pf-ace-image03.png)
@@ -98,7 +99,9 @@ The API is provided by ACE on Cloud "API Flow" and retrieve file from On-premise
         
         - You can now close the Synchronize your on-premises agent dialog.
 
-    
+    ![](images/callablelist.jpg)
+
+
     You have established secure connectivity between flows running in App Connect on IBM Cloud and in the integration server in your on-premises App Connect Enterprise.
 
 ## Import and deploy flow components
@@ -158,7 +161,7 @@ Otherwise, just return to the Dashboard, You can start the flow from there, as o
          }
          ```
 
-## Use a Front office
+## Use a Web Front UI
 
 A sample of ReactJS application is provided to demonstrate the API capability.
 
@@ -172,7 +175,7 @@ A sample of ReactJS application is provided to demonstrate the API capability.
   // ------------------------------------------------------------
   ```
 
-  - in the **uc1-invoice-front** run **npm install** and **npm start**
+  - in the **uc1-front-ui** run **npm install** and **npm start**
 
   - Enter a order number (Order number will present in PDF file name)
   - Click on button **Get Invoice file (Encoded)** 
@@ -180,5 +183,48 @@ A sample of ReactJS application is provided to demonstrate the API capability.
  ![Front](images/front.gif)
 
 
+## Alternative solution
+
+It is also possible to return File with blob format instead encoded in a JSON file.
+
+In ACE on Cloud, you can deploy BAR file. The BAR is a flow you have created in ACE Toolkit.
+
+ACE Toolkit flow give more flexibilities to create REST API and data returned by API.
+
+In case you want to return file as blob, i provided a sample of REST API.
+
+This flow is similar as the REST API provided by *Designer* except the API Response return File as Blob.
 
 
+ ![UC1_APIRequestFileCallable](images/UC1_APIRequestFileCallable.jpg)
+
+
+- Download the [project interchange ZIP file](https://github.com/fdut/file-download-callableflow/blob/main/toolkit/src/APIRequestFileCallable.zip) and extract the BAR file from that archive.
+
+
+ - In App Connect on IBM Cloud, import the flow:  from the dashboard select **New** > **Import a BAR file** ..., select the **APIRequestFileCallable.bar** file, then click **Import**. 
+
+- Start the flow  and test it. 
+    - Click on UC1_APIRequestFileCallable flow
+    - Copy/Paste UserName and Password
+    - Click on **Show API Explorer**
+    - Click on **GET /Invoice** operation
+    - Click **Try it**
+    - Enter UserName and Password (Copied before)
+    - Enter a *ordername* (Order number will present in PDF file name)
+    - The file is returned as Blob.
+
+
+     ![Result](images/testblobresult.jpg)
+
+
+
+
+![Final](images/download-file-api-arch-logique.png)
+
+
+
+# Ressources
+
+- [AppConnect on IBM Cloud](https://cloud.ibm.com/catalog/services/app-connect)
+- [Download IBM App Connect Enterprise for Developers](https://www.ibm.com/docs/en/app-connect/12.0?topic=enterprise-download-ace-developer-edition-get-started)
